@@ -1,5 +1,6 @@
-package com.inMemoryRedis.In_Memory_Redis;
+package com.miniRedis;
 
+import com.inMemoryRedis.In_Memory_Redis.ValueWrapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -44,8 +45,30 @@ public class KeyValueStoreService {
         wrapper.setValue(String.valueOf(val));
         return wrapper.getValue();
         } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Value for key '" + key + "' is not a valid integer");
+      throw new IllegalArgumentException("Value for key '" + key + "' is not a valid integer");
     }
+  }
+  public boolean expired(String key, long seconds) {
+     ValueWrapper wrapper = store.get(key);
+     if(wrapper==null || wrapper.isExpired()) {
+       store.remove(key);
+       return false;
+     } else {
+       long expiry = System.currentTimeMillis()+(seconds*100);
+       wrapper.setExpiryTimeMillis(expiry);
+       return true;
+     }
+  }
 
+  public long ttl(String key) {
+    ValueWrapper wrapper = store.get(key);
+    if(wrapper == null || wrapper.isExpired()) {
+      store.remove(key);
+      return -2;
+    }
+    Long expire = wrapper.getExpiryTimeMillis();
+    if(expire==null) return -1;
+    Long ttl = (expire-System.currentTimeMillis())/1000;
+    return Math.max(ttl, 0);
   }
 }

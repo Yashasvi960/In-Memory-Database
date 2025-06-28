@@ -1,4 +1,4 @@
-package com.inMemoryRedis.In_Memory_Redis;
+package com.miniRedis;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +39,6 @@ public class CommandController {
     }
 
     @PostMapping("/incr")
-
     public ResponseEntity<String> increment(@RequestParam String key) {
         try{
             String response = keyValueStoreService.increment(key);
@@ -49,4 +48,17 @@ public class CommandController {
         }
 
     }
+
+    @PostMapping("/expire")
+    public ResponseEntity<String>  expire(@RequestParam String key, @RequestParam long seconds) {
+       boolean response = keyValueStoreService.expired(key, seconds);
+       return ResponseEntity.ok(response?"1":"0");
+    }
+
+    @GetMapping("/ttl")
+    public ResponseEntity<String> ttl(@RequestParam String key) {
+       Long ttl = keyValueStoreService.ttl(key);
+       return ResponseEntity.ok(String.valueOf(ttl));
+    }
+
 }
